@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+        <style>
+            #map {
+                height: 100%;
+            }
+
+            html, body {
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            #over_map {
+                position: absolute;
+                top: 10px;
+                left: 89%;
+                z-index: 99;
+                background-color: #ccffcc;
+                padding: 10px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="map"></div>
+
+        <div id="over_map">
+            <div>
+                <span>Online Cars: </span><span id="cars">0</span>
+            </div>
+        </div>
+		
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+		<script>
+            // counter for online cars...
+            var cars_count = 0;  
+			var bounds;
+			var marker;
+            // markers array to store all the markers, so that we could remove marker when any car goes offline and its data will be remove from realtime database...
+            var markers = [];
+			setInterval(refreshMapa, 5000);
+			var position = [0, 0];
+            var map;
+            function initMap() { // Google Map Initialization... 
+                map = new google.maps.Map(document.getElementById('map'), {
+                    zoom: 16,
+                    center: new google.maps.LatLng(-6.2267392, 106.85317119),
+                    mapTypeId: 'terrain'
+                });
+            }
+			
+			// refreshMapa();
+			
+			function refreshMapa() {
+				$.get("<?=base_url()?>maps/get_marker", function(response){
+					$.each(JSON.parse(response), function(key, data) {
+						// var latlng = JSON.parse(data.latlng);
+						// marker = {lat: Number(latlng.lat), lng: Number(latlng.lng)};
+						// addMarker(marker, data.nik);
+						
+						if(markers[data.nik]!==undefined) {
+							// var latlng = JSON.parse(data.latlng);
+							// var result = [Number(latlng.lat), Number(latlng.lng)];
+							transition(data);
+						} else {
+							AddCar(data);
+						}
+					});
+				});
+			}
+			
+			// This Function will create a car icon with angle and add/display that marker on the map
+            function AddCar(data) {
+
+                var icon = { // car icon
+                    path: 'M29.395,0H17.636c-3.117,0-5.643,3.467-5.643,6.584v34.804c0,3.116,2.526,5.644,5.643,5.644h11.759   c3.116,0,5.644-2.527,5.644-5.644V6.584C35.037,3.467,32.511,0,29.395,0z M34.05,14.188v11.665l-2.729,0.351v-4.806L34.05,14.188z    M32.618,10.773c-1.016,3.9-2.219,8.51-2.219,8.51H16.631l-2.222-8.51C14.41,10.773,23.293,7.755,32.618,10.773z M15.741,21.713   v4.492l-2.73-0.349V14.502L15.741,21.713z M13.011,37.938V27.579l2.73,0.343v8.196L13.011,37.938z M14.568,40.882l2.218-3.336 h13.771l2.219,3.336H14.568z M31.321,35.805v-7.872l2.729-0.355v10.048L31.321,35.805',
+                    scale: 0.4,
+                    fillColor: "#427af4", //<-- Car Color, you can change it 
+                    fillOpacity: 1,
+                    strokeWeight: 1,
+                    anchor: new google.maps.Point(0, 5),
+                    // rotation: data.val().angle //<-- Car angle
+                    rotation: 0 //<-- Car angle
+                };
+				
+				var latlng = JSON.parse(data.latlng);
+                var uluru = {lat: Number(latlng.lat), lng: Number(latlng.lng)};
+
+				
+			
+				var bounds = new google.maps.LatLngBounds();
+				var infowindow = new google.maps.InfoWindow({
+					content: "KODE PIC : "+data.nik
+				});
+			
+                marker = new google.maps.Marker({
+                    position: uluru,
+                    icon: icon,
+                    map: map
+                });
+				
+				// bounds.extend(marker.position);
+
+                markers[data.nik] = marker; // add marker in the markers array...
+                document.getElementById("cars").innerHTML = cars_count;
+				
+				marker.addListener('click', function() {
+					infowindow.open(map, marker);
+				});
+				
+				
+				// map.fitBounds(bounds);
+				
+				// if(markers['K0004']!==undefined) {
+					// markers['K0004'].setMap(null);
+				// }
+				// if(markers['K0008']!==undefined) {
+					// markers['K0008'].setMap(null);
+				// }
+				// if(markers['K0012']!==undefined) {
+					// markers['K0012'].setMap(null);
+				// }
+				
+				// AddCar(data);
+            }
+			
+			var numDeltas = 100;
+			var delay = 10; //milliseconds
+			var i = 0;
+			var deltaLat;
+			var deltaLng;
+			function transition(res){
+				var latlng = JSON.parse(res.latlng);
+				var result = [Number(latlng.lat), Number(latlng.lng)];
+				// console.log("RESULT : "+result);
+				// console.log("POSITION : "+markers[res.nik].position);
+				
+				i = 0;
+				deltaLat = (result[0] - markers[res.nik].position.lat())/numDeltas;
+				deltaLng = (result[1] - markers[res.nik].position.lng())/numDeltas;
+				moveMarker();
+				
+				// console.log(deltaLat+" "+deltaLng);
+			}
+			
+			function moveMarker(){
+				position[0] += deltaLat;
+				position[1] += deltaLng;
+				var latlng = new google.maps.LatLng(position[0], position[1]);
+				marker.setPosition(latlng);
+				if(i!=numDeltas){
+					i++;
+					setTimeout(moveMarker, delay);
+				}
+			}
+			
+        </script>
+		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAb7d-G5Ea9j3X_haj37bSPJkSN7PpAp7I&callback=initMap" async defer></script>
+	</body>
+
+</html>

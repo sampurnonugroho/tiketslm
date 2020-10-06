@@ -1,0 +1,43 @@
+select *, cashtransit.id as id_ct, cashtransit_detail.id as id_detail, cashtransit_detail.ctr as jum_ctr FROM cashtransit LEFT JOIN master_branch ON(cashtransit.branch=master_branch.id) LEFT JOIN cashtransit_detail ON(cashtransit.id=cashtransit_detail.id_cashtransit) LEFT JOIN client ON(cashtransit_detail.id_bank=client.id) LEFT JOIN runsheet_cashprocessing ON(cashtransit.id=runsheet_cashprocessing.id_cashtransit) WHERE cashtransit_detail.state='ro_atm' AND cashtransit_detail.data_solve!='' AND cashtransit_detail.id='23' GROUP BY cashtransit_detail.id ORDER BY cashtransit.id DESC
+
+SELECT SQL_CALC_FOUND_ROWS
+				A.id, 
+				D.wsid, 
+				D.lokasi, 
+				D.type, 
+				B.id_bank, 
+				B.date, 
+				B.updated_date, 
+				D.ctr,
+				F.pcs_50000,
+				F.pcs_100000,
+				B.data_solve,
+				B.cpc_process,
+				B.ctr as jum_ctr
+									FROM cashtransit A
+									LEFT JOIN (SELECT id, id_bank, id_cashtransit, state, data_solve, cpc_process, date, updated_date, ctr FROM cashtransit_detail) B ON(A.id=B.id_cashtransit) 
+									LEFT JOIN (SELECT id, name FROM master_branch) C ON(A.branch=C.id) 
+									LEFT JOIN (SELECT id, wsid, lokasi, type, ctr FROM client) D ON(B.id_bank=D.id)  
+									LEFT JOIN (SELECT id as id_ctrs, id_cashtransit, pcs_50000, pcs_100000 FROM runsheet_cashprocessing) F ON(A.id=F.id_cashtransit)
+									WHERE B.state='ro_atm' AND B.data_solve!='' AND B.id='23' AND 
+									B.id IN (
+										SELECT MAX(id)
+										FROM cashtransit_detail
+										WHERE state='ro_atm' AND data_solve!=''
+										GROUP BY id_bank
+									) GROUP BY D.wsid
+
+SELECT SQL_CALC_FOUND_ROWS
+				*
+									FROM cashtransit A
+									LEFT JOIN cashtransit_detail B ON(A.id=B.id_cashtransit) 
+									LEFT JOIN master_branch C ON(A.branch=C.id) 
+									LEFT JOIN client D ON(B.id_bank=D.id)  
+									LEFT JOIN runsheet_cashprocessing F ON(B.id=F.id)
+									WHERE B.state='ro_atm' AND B.data_solve!='' AND B.id='23' AND 
+									B.id IN (
+										SELECT MAX(id)
+										FROM cashtransit_detail
+										WHERE state='ro_atm' AND data_solve!=''
+										GROUP BY id_bank
+									) GROUP BY D.wsid

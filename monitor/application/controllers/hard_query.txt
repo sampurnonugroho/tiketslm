@@ -1,0 +1,8 @@
+select *, cashtransit.id as id_ct, SUM(SELECT COUNT(DISTINCT client.sektor) FROM cashtransit_detail LEFT JOIN client ON(cashtransit_detail.id_bank=client.id) WHERE cashtransit_detail.id_cashtransit='10' AND client.sektor NOT IN (SELECT run_number FROM vehicle) GROUP BY client.sektor) as count FROM cashtransit LEFT JOIN master_branch ON(cashtransit.branch=master_branch.id) ORDER BY cashtransit.id DESC
+
+
+SELECT * FROM cashtransit_detail LEFT JOIN client ON(cashtransit_detail.id_bank=client.id) WHERE cashtransit_detail.id_cashtransit='4' AND client.sektor NOT IN (SELECT run_number FROM vehicle)
+
+
+
+select *, cashtransit.id as id_ct, IFNULL((SELECT COUNT(DISTINCT client.sektor) FROM cashtransit_detail LEFT JOIN client ON(cashtransit_detail.id_bank=client.id) WHERE cashtransit_detail.id_cashtransit=cashtransit.id AND client.sektor NOT IN (SELECT run_number FROM vehicle) GROUP BY cashtransit_detail.id_cashtransit), 0) as count FROM cashtransit LEFT JOIN master_branch ON(cashtransit.branch=master_branch.id) ORDER BY cashtransit.id DESC
