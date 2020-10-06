@@ -1,0 +1,31 @@
+\$this->db->query\((.+?)\);
+
+// REMOVE 
+\$this->db->query\((.+?)\);
+
+
+iosudhfsdkflasgj \aaa asdgsdga3453t.ggsdg\n \bbb
+hjdfghjdfgjhh \ccc jtj56ywyrty546y \bbb 
+yjksfgh \aaa sefgwetgwgeregerg \bbb
+u56j56jh \ddd agfwegaewrg\n \bbb
+
+Find what: \\aaa(\b.+?)\\bbb
+Replace with: $1
+check Wrap around
+check Regular expression
+UNCHECK . matches newline
+Replace all
+
+Result for given example:
+
+iosudhfsdkflasgj  asdgsdga3453t.ggsdg\n 
+hjdfghjdfgjhh \ccc jtj56ywyrty546y \bbb 
+yjksfgh  sefgwetgwgeregerg 
+u56j56jh \ddd agfwegaewrg\n \bbb
+
+
+Explanation:
+
+\\aaa       # \aaa (the backslash has to be escaped)
+(\b.+?)     # group 1, a word boundry, 1 or more any character, not greedy
+\\bbb       # \bbb (the backslash has to be escaped)

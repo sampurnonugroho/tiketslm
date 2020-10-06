@@ -1,0 +1,10 @@
+$insert = $this->curl->simple_post(rest_api().'/master_',$data,array({CAPSLOCK}CURLOPT_BUFFERSIZE{CAPSLOCK} => 10));{ENTER}{ENTER}{TAB}{TAB}if (!$insert) {SHIFT}[
+		
+		
+$update = $this->curl->simple_put(rest_api().'/master_',$data,array({CAPSLOCK}CURLOPT_BUFFERSIZE{CAPSLOCK} => 10));{ENTER}{ENTER}{TAB}{TAB}if (!$update) {SHIFT}[
+
+
+		
+$delete =  $this->curl->simple_delete(rest_api().'/master_', array('id'=>$id), array({CAPSLOCK}CURLOPT_BUFFERSIZE{CAPSLOCK} => 10));{ENTER}{ENTER}{TAB}{TAB}if (!$delete) {SHIFT}[
+
+

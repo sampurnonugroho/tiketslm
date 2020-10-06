@@ -1,0 +1,1 @@
+<a href="<?=base_url()?>pdf/generate" target="_blank">pdf</a>

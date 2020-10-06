@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Bootstrap Lightbox</title>
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <link href="../dist/ekko-lightbox.css" rel="stylesheet">
+
+        <!-- for documentation only -->
+        <style type="text/css">
+            div.row > div > div.row {
+                margin-bottom: 15px;
+            }
+
+            html {
+                background-color: #02709e;
+            }
+            body {
+                background: #fefefe;
+                padding-bottom: 50px;
+            }
+
+            div.top-container {
+                padding-top:100px;
+                background-color: #02709e;
+                color:#ccc;
+            }
+            div.top-container h1 {
+                color:white;
+            }
+            div.top-container a {
+                color:#ccc;
+                border-bottom:1px dotted white;
+            }
+            div.top-container a:hover {
+                color: white;
+                cursor:pointer;
+                border-bottom:1px solid white;
+                text-decoration: none;
+            }
+            div.top-header {
+                margin-bottom:100px;
+            }
+
+            h2 {
+                background-color:#02709e;
+                color:white;
+                display:inline-block;
+                padding:6px;
+                margin-top:100px;
+            }
+
+            h3 {
+                padding-bottom:5px;
+                margin-bottom:10px;
+                border-bottom:1px solid #f2f2f2;
+                margin-top: 50px;
+            }
+
+            h4 {
+                margin-top:25px;
+            }
+
+            figure {
+                position: relative;
+            }
+
+            figure figcaption {
+                font-size: 22px;
+                color: #fff;
+                text-decoration: none;
+                bottom: 10px;
+                right: 20px;
+                position: absolute;
+                background-color: #000;
+            }
+			code[data-code], code.block-code {
+                display:block;
+                overflow:scroll;
+                font-size:12px;
+				white-space: pre;
+			}
+
+            table {
+                font-size:12px;
+            }
+            .footer {
+                text-align: center;
+            }
+            .footer span {
+                margin-top:100px;
+                font-size:12px;
+                background-color:#02709e;
+                color:white;
+                display:inline-block;
+                padding:6px;
+            }
+            .footer span a {
+                color:#ccc;
+                border-bottom:1px dotted white;
+            }
+            .footer span a:hover {
+                cursor:pointer;
+                color: white;
+                border-bottom:1px solid white;
+                text-decoration: none;
+            }
+            a.anchorjs-link {
+                color:black;
+            }
+            a.anchorjs-link:hover {
+                color:#02709e;
+                text-decoration: none;
+            }
+        </style>
+    </head>
+    <body>
+
+        <div class="container">
+            <div class="row">
+                <div class="col-md-10 offset-md-1">
+                    <h3 id="single-image">Single Image</h3>
+                    <p>Note: uses modal plugin title option via <code>data-title</code>, and the custom footer tag using <code>data-footer</code></p>
+                    <div class="row">
+                        <div class="offset-sm-4 col-sm-3" data-code="example-1">
+                            <a href="https://unsplash.it/1200/768.jpg?image=250" data-toggle="lightbox" data-title="A random title" data-footer="A custom footer text">
+                                <img src="https://unsplash.it/600.jpg?image=250" class="img-fluid">
+                            </a>
+                        </div>
+                    </div>
+                    <code class="html" data-code="example-1"></code>
+
+                </div>
+            </div>
+        </div>
+
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js" integrity="sha384-THPy051/pYDQGanwU6poAc/hOdQxjnOEXzbT+OuUAFqNqFjL+4IGLBgCJC3ZOShY" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/tether/1.2.0/js/tether.min.js" integrity="sha384-Plbmg8JY28KFelvJVai01l8WyZzrYWG825m+cZ0eDDS1f7d/js6ikvy1+X+guPIB" crossorigin="anonymous"></script>
+        <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <script src="../dist/ekko-lightbox.js"></script>
+
+        <!-- for documentation only -->
+        <script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/3.2.1/anchor.min.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function ($) {
+                // delegate calls to data-toggle="lightbox"
+                $(document).on('click', '[data-toggle="lightbox"]:not([data-gallery="navigateTo"])', function(event) {
+                    event.preventDefault();
+                    return $(this).ekkoLightbox({
+                        onShown: function() {
+                            if (window.console) {
+                                return console.log('Checking our the events huh?');
+                            }
+                        },
+						onNavigate: function(direction, itemIndex) {
+                            if (window.console) {
+                                return console.log('Navigating '+direction+'. Current item: '+itemIndex);
+                            }
+						}
+                    });
+                });
+
+                //Programmatically call
+                $('#open-image').click(function (e) {
+                    e.preventDefault();
+                    $(this).ekkoLightbox();
+                });
+                $('#open-youtube').click(function (e) {
+                    e.preventDefault();
+                    $(this).ekkoLightbox();
+                });
+
+				// navigateTo
+                $(document).on('click', '[data-toggle="lightbox"][data-gallery="navigateTo"]', function(event) {
+                    event.preventDefault();
+
+                    return $(this).ekkoLightbox({
+                        onShown: function() {
+
+							this.modal().on('click', '.modal-footer a', function(e) {
+
+								e.preventDefault();
+								this.navigateTo(2);
+
+                            }.bind(this));
+
+                        }
+                    });
+                });
+
+
+                /**
+                 * Documentation specific - ignore this
+                 */
+                anchors.options.placement = 'left';
+                anchors.add('h3');
+                $('code[data-code]').each(function() {
+
+                    var $code = $(this),
+                        $pair = $('div[data-code="'+$code.data('code')+'"]');
+
+                    $code.hide();
+                    var text = $code.text($pair.html()).html().trim().split("\n");
+                    var indentLength = text[text.length - 1].match(/^\s+/)
+                    indentLength = indentLength ? indentLength[0].length : 24;
+                    var indent = '';
+                    for(var i = 0; i < indentLength; i++)
+                        indent += ' ';
+                    if($code.data('trim') == 'all') {
+                        for (var i = 0; i < text.length; i++)
+                            text[i] = text[i].trim();
+                    } else  {
+                        for (var i = 0; i < text.length; i++)
+                            text[i] = text[i].replace(indent, '    ').replace('    ', '');
+                    }
+                    text = text.join("\n");
+                    $code.html(text).show();
+
+                });
+            });
+        </script>
+    </body>
+</html>

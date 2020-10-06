@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<title>GeekOnJava: Directions Complex</title>
+
+
+		<style>
+			html {
+				height: 100%;
+			}
+
+			body {
+				height: 100%;
+				margin: 0px;
+				font-family: Helvetica, Arial;
+			}
+		</style>
+
+		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAb7d-G5Ea9j3X_haj37bSPJkSN7PpAp7I&sensor=false"></script>
+		<script type="text/javascript" src="<?=base_url()?>assets/v3_epoly.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+		<script type="text/javascript">
+			var map;
+			var infowindow = null;
+			var position;
+			var markers = [];
+			var bounds;
+			
+			var timerHandle = [];
+			
+			function initialize() {
+				infowindow = new google.maps.InfoWindow({
+					size: new google.maps.Size(150, 50)
+				});
+				
+				var myOptions = {
+					zoom: 12,
+                    center: new google.maps.LatLng(-6.2267392, 106.85317119),
+                    mapTypeId: 'terrain'
+				}
+				map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+			
+				google.maps.event.addListener(map, 'click', function( event ){
+					// alert( "Latitude: "+event.latLng.lat()+" "+", longitude: "+event.latLng.lng() ); 
+					
+					// var copyText = document.getElementById("myInput");
+					// copyText.value = event.latLng.lat()+", "+event.latLng.lng();
+					// copyText.select();
+					// copyText.setSelectionRange(0, 99999)
+					// document.execCommand("copy");
+					// alert("Copied the text: " + copyText.value);
+					
+					var uluru = {lat: Number(event.latLng.lat()), lng: Number(event.latLng.lng())};
+					
+					// moove('K0004', uluru);
+				});
+			}
+			
+			setInterval(refreshMapa, 2000);
+			
+			function refreshMapa() {
+				$.get("<?=base_url()?>maps/get_marker", function(response){
+					$.each(JSON.parse(response), function(key, data) {
+						// var latlng = JSON.parse(data.latlng);
+						// marker = {lat: Number(latlng.lat), lng: Number(latlng.lng)};
+						// addMarker(marker, data.nik);
+						
+						if(markers[data.nik]!==undefined) {
+							var latlng = JSON.parse(data.latlng);
+							var uluru = {lat: Number(latlng.lat), lng: Number(latlng.lng)};
+							
+							moove(data.nik, uluru);
+						} else {
+							AddCar(data);
+						}
+					});
+				});
+			}
+			
+			function AddCar(data) {
+                var icon = { // car icon
+                    path: 'M29.395,0H17.636c-3.117,0-5.643,3.467-5.643,6.584v34.804c0,3.116,2.526,5.644,5.643,5.644h11.759   c3.116,0,5.644-2.527,5.644-5.644V6.584C35.037,3.467,32.511,0,29.395,0z M34.05,14.188v11.665l-2.729,0.351v-4.806L34.05,14.188z    M32.618,10.773c-1.016,3.9-2.219,8.51-2.219,8.51H16.631l-2.222-8.51C14.41,10.773,23.293,7.755,32.618,10.773z M15.741,21.713   v4.492l-2.73-0.349V14.502L15.741,21.713z M13.011,37.938V27.579l2.73,0.343v8.196L13.011,37.938z M14.568,40.882l2.218-3.336 h13.771l2.219,3.336H14.568z M31.321,35.805v-7.872l2.729-0.355v10.048L31.321,35.805',
+                    scale: 0.4,
+                    fillColor: "#427af4", //<-- Car Color, you can change it 
+                    fillOpacity: 1,
+                    strokeWeight: 1,
+                    anchor: new google.maps.Point(0, 5),
+                    // rotation: data.val().angle //<-- Car angle
+                    rotation: 0 //<-- Car angle
+                };
+				
+				var latlng = JSON.parse(data.latlng);
+                var uluru = {lat: Number(latlng.lat), lng: Number(latlng.lng)};
+				var bounds = new google.maps.LatLngBounds();
+				
+				var infowindow = new google.maps.InfoWindow();
+				
+				var marker = new google.maps.Marker({
+                    position: uluru,
+                    // icon: icon,
+                    map: map
+                });
+				
+				bounds.extend(marker.position);
+				
+				markers[data.nik] = marker;
+				
+				marker.addListener('click', function() {
+					infowindow.setContent("<center>"+data.nik+"<br>"+data.nama+"</center>");
+					infowindow.open(map, marker);
+				});
+				
+				infowindow.setContent("<center>"+data.nik+"<br>"+data.nama+"</center>");
+				infowindow.open(map, marker);
+            }
+			
+			
+			function moove(index, latlng) {
+				marker = markers[index];
+				marker.setPosition(latlng);
+				
+				
+				// var bounds = new google.maps.LatLngBounds();
+				// bounds.extend(marker.position);
+				
+				// var bearing = getRndInteger(0, 360);
+				// console.log(bearing);
+				// var icon = marker.getIcon();
+				// icon.rotation = bearing;
+				// marker.setIcon(icon);
+				// console.log(marker);
+			}
+
+
+			function getRndInteger(min, max) {
+				return Math.floor(Math.random() * (max - min) ) + min;
+			}
+			
+			var lastVertex = 1;
+			var stepnum = 0;
+			var step = 50; // 5; // metres
+			var tick = 100; // milliseconds
+			var eol = [];
+			//----------------------------------------------------------------------                
+			function updatePoly(i, d) {
+				// Spawn a new polyline every 20 vertices, because updating a 100-vertex poly is too slow
+				if (poly2[i].getPath().getLength() > 20) {
+					poly2[i] = new google.maps.Polyline([polyline[i].getPath().getAt(lastVertex - 1)]);
+					// map.addOverlay(poly2)
+				}
+
+				if (polyline[i].GetIndexAtDistance(d) < lastVertex + 2) {
+					if (poly2[i].getPath().getLength() > 1) {
+						poly2[i].getPath().removeAt(poly2[i].getPath().getLength() - 1)
+					}
+					poly2[i].getPath().insertAt(poly2[i].getPath().getLength(), polyline[i].GetPointAtDistance(d));
+				} else {
+					poly2[i].getPath().insertAt(poly2[i].getPath().getLength(), endLocation[i].latlng);
+				}
+			}
+			//----------------------------------------------------------------------------
+
+			function animate(index, d) {
+				if (d > eol[index]) {
+
+					marker[index].setPosition(endLocation[index].latlng);
+					return;
+				}
+				var p = polyline[index].GetPointAtDistance(d);
+
+				//map.panTo(p);
+				marker[index].setPosition(p);
+				updatePoly(index, d);
+				timerHandle[index] = setTimeout("animate(" + index + "," + (d + step) + ")", tick);
+			}
+
+			//-------------------------------------------------------------------------
+
+			function startAnimation(index) {
+				if (timerHandle[index]) clearTimeout(timerHandle[index]);
+				eol[index] = polyline[index].Distance();
+				map.setCenter(polyline[index].getPath().getAt(0));
+
+				poly2[index] = new google.maps.Polyline({
+					path: [polyline[index].getPath().getAt(0)],
+					strokeColor: "#FFFF00",
+					strokeWeight: 3
+				});
+
+				timerHandle[index] = setTimeout("animate(" + index + ",50)", 2000); // Allow time for the initial map display
+			}
+
+			//----------------------------------------------------------------------------    
+		</script>
+	</head>
+
+	<body onload="initialize()">
+		<div id="tools" hidden>
+			<button onclick="setRoutes();">Start</button>
+			<input type="text" value="Hello World" id="myInput">
+		</div>
+		<div id="map_canvas" style="width:100%;height:100%;"></div>
+	</body>
+</html>
